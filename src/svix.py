@@ -61,10 +61,14 @@ def svix_squared(cdf):
     >>> round(svix_squared(risk_neutral_cdf(smile, rate=0.03)), 4)
     0.0401
     """
-    ## TODO: Implement this function as specified in the docstring above.
-    raise NotImplementedError(
-        "Implement svix_squared (see HOMEWORK INSTRUCTIONS at the top of this file)"
-    )
+    # Equal-weighted integral of OTM puts below the forward and OTM calls above it.
+    # One array, so the segment that crosses the forward is not dropped.
+    tau = float(cdf.maturity_years)
+    rf = float(cdf.forward)
+    grid = np.asarray(cdf.grid, dtype=float)
+    otm = np.where(grid <= rf, cdf.put_grid, cdf.call_grid)
+    integral = np.trapezoid(otm, grid)
+    return float(2.0 / (tau * rf) * integral)
 
 
 def interpolate_variance(svix2_near, tau_near, svix2_far, tau_far, horizon_years=HORIZON_DAYS / 365.0):
